@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/GSI-AddressSearch" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
