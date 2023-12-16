@@ -8,7 +8,7 @@ email=hrko9gis@gmail.com
 
 about=This plugin allows the user to search for a address and get its coordinates using GSI API.
 
-repository=https://github.com/hrkoh/GSI-AddressSearch
+repository=https://github.com/hrko9gis/GSI-AddressSearch
 # End of mandatory metadata
 
 # Recommended items:
