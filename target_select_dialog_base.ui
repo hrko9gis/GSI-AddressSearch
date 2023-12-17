@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>images/Search.gif</normaloff>images/Search.gif</iconset>
+    <normaloff>img/Search.gif</normaloff>img/Search.gif</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

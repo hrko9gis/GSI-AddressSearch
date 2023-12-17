@@ -21,7 +21,7 @@ hasProcessingProvider=no
 tags=address, location, gsi, japan, jpn
 
 category=Plugins
-icon=images/Search.gif
+icon=img/Search.gif
 # experimental flag
 experimental=True
 

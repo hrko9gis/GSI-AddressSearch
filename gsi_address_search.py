@@ -50,7 +50,7 @@ class GsiAddressSearch:
     def initGui(self):
         current_directory = os.path.dirname(os.path.abspath(__file__))
 
-        self.action = QAction(QIcon(os.path.join(current_directory, "images", "Search.gif")), \
+        self.action = QAction(QIcon(os.path.join(current_directory, "img", "Search.gif")), \
         u'住所検索', self.iface.mainWindow())
         self.action.triggered.connect(self.search)
 
