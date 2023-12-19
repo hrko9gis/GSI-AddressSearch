@@ -6,7 +6,7 @@ version=0.1
 author=Kohei Hara
 email=hrko9gis@gmail.com
 
-about=This plugin allows the user to search for a address and get its coordinates using GSI API.
+about=This plugin allows the user to search for a address and get its coordinates using GSI API.GSI is one of Japanese Governmental Organizations, stands for Geospatial Information Authority of Japan. https://www.gsi.go.jp/
 
 tracker=https://github.com/hrko9gis/GSI-AddressSearch/issues
 repository=https://github.com/hrko9gis/GSI-AddressSearch
