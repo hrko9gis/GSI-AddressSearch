@@ -97,6 +97,8 @@ class GsiAddressSearch:
             if len(locations) == 1:
                 self.locate(point)
             else:
+                locations = dict(sorted(locations.items()))
+            
                 all_str = QCoreApplication.translate('GsiAddressSearch', 'All')
                 tsdlg = TargetSelectDialog()
                 tsdlg.placesComboBox.addItem(all_str)

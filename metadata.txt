@@ -2,7 +2,7 @@
 name=GSI-AddressSearch
 qgisMinimumVersion=3.0
 description=国土地理院のAPIを利用して、住所を検索した結果の地点を表示します。施設等の目標物名称での検索も行うことができます。国土地理院API（https://msearch.gsi.go.jp/address-search/AddressSearch）から取得したデータを加工して利用。This plugin allows the user to search for a address and get its coordinates using GSI API.
-version=0.1
+version=0.2
 author=Kohei Hara
 email=hrko9gis@gmail.com
 
