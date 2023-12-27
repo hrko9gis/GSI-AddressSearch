@@ -265,6 +265,24 @@ class GsiAddressSearch:
         point = QgsPoint(float(lon), float(lat))
         
         try:
+            map_crs = self.iface.mapCanvas().mapRenderer().destinationCrs()
+        except:
+            map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
+        
+        crs_wgs84 = QgsCoordinateReferenceSystem()
+        crs_wgs84.createFromSrid(4326) # WGS 84 / UTM zone 33N
+        
+        try:
+            transformer = QgsCoordinateTransform(crs_wgs84, map_crs)
+        except:
+            transformer = QgsCoordinateTransform(crs_wgs84, map_crs, QgsProject.instance())
+
+        try:
+            point = transformer.transform(point)
+        except:
+            point = transformer.transform(QgsPointXY(point)) 
+
+        try:
             fields = self.layer.pendingFields()
         except:
             fields = self.layer.fields()
