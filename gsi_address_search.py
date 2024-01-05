@@ -14,6 +14,7 @@ import sys, os
 # Import the PyQt and QGIS libraries
 try:
     from qgis.core import *
+    from qgis.gui import *
     from PyQt5.QtCore import *
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *
@@ -52,7 +53,7 @@ class GsiAddressSearch:
             self.registry = QgsProject.instance()
 
 
-#    def logMessage(self, msg):
+#    def log_message(self, msg):
 #        QgsMessageLog.logMessage(msg, 'GSI-AddressSearch')
 
 
@@ -67,11 +68,16 @@ class GsiAddressSearch:
         u'検索ポイント追加', self.iface.mainWindow())
         self.add_point_action.triggered.connect(self.search_add_point)
 
+        self.click_point_address_action = QAction(QIcon(os.path.join(current_directory, "img", "ClickPointAddress.gif")), \
+        u'クリック地点住所', self.iface.mainWindow())
+        self.click_point_address_action.triggered.connect(self.click_point_address)
+
         self.menu = QMenu(QCoreApplication.translate('GSI-AddressSearch', u'住所検索（国土地理院API）'))
-        self.menu.addActions([self.action, self.add_point_action])
+        self.menu.addActions([self.action, self.add_point_action, self.click_point_address_action])
         self.iface.pluginMenu().addMenu(self.menu)
         self.iface.addToolBarIcon(self.action)
         self.iface.addToolBarIcon(self.add_point_action)
+        self.iface.addToolBarIcon(self.click_point_address_action)
 
         self.previous_map_tool = self.iface.mapCanvas().mapTool()
 
@@ -146,23 +152,11 @@ class GsiAddressSearch:
 
         point = QgsPoint(float(lon), float(lat))
 
-        try:
-            map_crs = self.iface.mapCanvas().mapRenderer().destinationCrs()
-        except:
-            map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
-        
-        crs_wgs84 = QgsCoordinateReferenceSystem()
-        crs_wgs84.createFromSrid(4326) # WGS 84 / UTM zone 33N
-        
-        try:
-            transformer = QgsCoordinateTransform(crs_wgs84, map_crs)
-        except:
-            transformer = QgsCoordinateTransform(crs_wgs84, map_crs, QgsProject.instance())
+        map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
+        crs_wgs84 = QgsCoordinateReferenceSystem('EPSG:4326') # WGS 84 / UTM zone 33N
+        transformer = QgsCoordinateTransform(crs_wgs84, map_crs, QgsProject.instance())
 
-        try:
-            point = transformer.transform(point)
-        except:
-            point = transformer.transform(QgsPointXY(point)) 
+        point = transformer.transform(QgsPointXY(point)) 
 
         self.canvas.setCenter(point)
 
@@ -181,11 +175,11 @@ class GsiAddressSearch:
             try:
                 results = geo_coder.geocode(unicode(gasdlg.address.text()).encode('utf-8'))
             except Exception as e:
-                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', u"住所検索 エラー"), QCoreApplication.translate('GSI-AddressSearch', u"ジオコーディングサービスでエラーが発生しました。:<br><strong>%s</strong>" % e))
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', u"検索ポイント追加 エラー"), QCoreApplication.translate('GSI-AddressSearch', u"ジオコーディングサービスでエラーが発生しました。:<br><strong>%s</strong>" % e))
                 return
 
             if not results:
-                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', u"住所検索 結果なし"), QCoreApplication.translate('GSI-AddressSearch', u"ジオコーディングサービスから検索結果を得られませんでした。: <strong>%s</strong>." % gasdlg.address.text()))
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', u"検索ポイント追加 結果なし"), QCoreApplication.translate('GSI-AddressSearch', u"ジオコーディングサービスから検索結果を得られませんでした。: <strong>%s</strong>." % gasdlg.address.text()))
                 return
 
             locations = {}
@@ -230,10 +224,7 @@ class GsiAddressSearch:
     
         if not self.registry.mapLayer(self.layerid) :
         
-            try:
-                crs = self.iface.mapCanvas().mapRenderer().destinationCrs()
-            except:
-                crs = self.iface.mapCanvas().mapSettings().destinationCrs()
+            crs = self.iface.mapCanvas().mapSettings().destinationCrs()
 
             self.layer = QgsVectorLayer("Point?crs=" + crs.authid(), "GSI-Points", "memory")
 
@@ -264,23 +255,11 @@ class GsiAddressSearch:
         
         point = QgsPoint(float(lon), float(lat))
         
-        try:
-            map_crs = self.iface.mapCanvas().mapRenderer().destinationCrs()
-        except:
-            map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
-        
-        crs_wgs84 = QgsCoordinateReferenceSystem()
-        crs_wgs84.createFromSrid(4326) # WGS 84 / UTM zone 33N
-        
-        try:
-            transformer = QgsCoordinateTransform(crs_wgs84, map_crs)
-        except:
-            transformer = QgsCoordinateTransform(crs_wgs84, map_crs, QgsProject.instance())
+        map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
+        crs_wgs84 = QgsCoordinateReferenceSystem('EPSG:4326') # WGS 84 / UTM zone 33N
+        transformer = QgsCoordinateTransform(crs_wgs84, map_crs, QgsProject.instance())
 
-        try:
-            point = transformer.transform(point)
-        except:
-            point = transformer.transform(QgsPointXY(point)) 
+        point = transformer.transform(QgsPointXY(point)) 
 
         try:
             fields = self.layer.pendingFields()
@@ -302,6 +281,50 @@ class GsiAddressSearch:
         self.layer.startEditing()
         self.layer.addFeatures(features)
         self.layer.commitChanges()
+
+
+    def click_point_address(self):
+        sb = self.iface.mainWindow().statusBar()
+        sb.showMessage(u"住所を調べたい場所をクリックしてください。")
+        ct = ClickPointAddressTool(self.iface, self.iface.mapCanvas());
+        self.previous_map_tool = self.iface.mapCanvas().mapTool()
+        self.iface.mapCanvas().setMapTool(ct)
+
+
+class ClickPointAddressTool(QgsMapTool):
+
+    def __init__(self, iface, canvas):
+        QgsMapTool.__init__(self, canvas)
+        self.canvas = canvas
+        self.iface = iface
+
+
+    def canvasPressEvent(self, event):
+
+        x = event.pos().x()
+        y = event.pos().y()
+        pres_pt = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+
+        map_crs = self.iface.mapCanvas().mapSettings().destinationCrs()
+        crs_wgs84 = QgsCoordinateReferenceSystem('EPSG:4326') # WGS 84 / UTM zone 33N
+        transformer = QgsCoordinateTransform(map_crs, crs_wgs84, QgsProject.instance())
+
+        point = transformer.transform(QgsPointXY(pres_pt)) 
+
+        geo_coder = GsiGeoCoder()
+
+        try:
+            results = geo_coder.reverse(point[0], point[1])
+
+            if not results:
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', "クリック地点住所 結果なし"), unicode(QCoreApplication.translate('GSI-AddressSearch', u"ジオコーディングサービスから検索結果を得られませんでした。: <strong>%s</strong>." % 'lon:' + str(point[0]) + ' lat:' + str(point[1]))))
+                return
+            else:
+                QMessageBox.information(None, u"クリック地点住所", str(results))
+                
+        except Exception as e:
+            QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GSI-AddressSearch', "クリック地点住所 エラー"), unicode(QCoreApplication.translate('GSI-AddressSearch',  u"ジオコーディングサービスでエラーが発生しました。:<br><strong>%s</strong>" % e)))
+        return
 
 
 if __name__ == "__main__":
